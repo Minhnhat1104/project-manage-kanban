@@ -10,7 +10,7 @@ import {
   Droppable,
   NotDraggingStyle,
   OnDragEndResponder,
-} from "react-beautiful-dnd";
+} from "@hello-pangea/dnd";
 
 interface Ticket {
   id: string;
@@ -110,49 +110,57 @@ const Kanban = () => {
     []
   );
 
-  const onDragEnd: OnDragEndResponder = useCallback((result) => {
-    const { source, destination } = result;
+  const onDragEnd: OnDragEndResponder = useCallback(
+    (result) => {
+      const { source, destination } = result;
 
-    // dropped outside the list
-    if (!destination) {
-      return;
-    }
+      // dropped outside the list
+      if (!destination) {
+        return;
+      }
 
-    const getList = (id: string) => state[id2List[id]];
+      const getList = (id: string) => state[id2List[id]];
 
-    if (source.droppableId === destination.droppableId) {
-      const items = reorder(
-        getList(source.droppableId),
-        source.index,
-        destination.index
-      );
-      console.log("🚀 ~ items:", items);
+      if (source.droppableId === destination.droppableId) {
+        const items = reorder(
+          getList(source.droppableId),
+          source.index,
+          destination.index
+        );
+        console.log(
+          "🚀 ~ items:",
+          getList(source.droppableId),
+          source.index,
+          destination.index
+        );
 
-      setState((prev) => ({
-        ...prev,
-        [source.droppableId === "droppable2" ? "selected" : "items"]: items,
-      }));
-    } else {
-      const result: any = move(
-        getList(source.droppableId),
-        getList(destination.droppableId),
-        source,
-        destination
-      );
-      console.log("🚀 ~ result:", result);
+        setState((prev) => ({
+          ...prev,
+          [source.droppableId === "droppable2" ? "selected" : "items"]: items,
+        }));
+      } else {
+        const result: any = move(
+          getList(source.droppableId),
+          getList(destination.droppableId),
+          source,
+          destination
+        );
+        console.log("🚀 ~ result:", result);
 
-      setState({
-        items: result.droppable,
-        selected: result.droppable2,
-      });
-    }
-  }, []);
+        setState({
+          items: result.droppable,
+          selected: result.droppable2,
+        });
+      }
+    },
+    [state]
+  );
 
   return (
     <Grid container spacing={2}>
       <DragDropContext onDragEnd={onDragEnd}>
         <Grid size={4}>
-          <Droppable droppableId="droppable">
+          <Droppable droppableId="droppable" isDropDisabled={false}>
             {(provided, snapshot) => (
               <div
                 ref={provided.innerRef}
@@ -181,7 +189,7 @@ const Kanban = () => {
           </Droppable>
         </Grid>
         <Grid size={4}>
-          <Droppable droppableId="droppable2">
+          <Droppable droppableId="droppable2" isDropDisabled={false}>
             {(provided, snapshot) => (
               <div
                 ref={provided.innerRef}

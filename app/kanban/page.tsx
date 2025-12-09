@@ -1,5 +1,12 @@
-import dynamic from "next/dynamic";
+import React from "react";
+import KanbanComponent from "@components/kanban";
 
-const kanban = dynamic(() => import("@components/kanban"));
+const Kanban = () => {
+  return (
+    <div>
+      <KanbanComponent />
+    </div>
+  );
+};
 
-export default kanban;
+export default Kanban;
