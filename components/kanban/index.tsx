@@ -1,6 +1,6 @@
 "use client";
 
-import { Grid } from "@mui/material";
+import { Box, Grid, Stack, Typography, useTheme } from "@mui/material";
 import React, { CSSProperties, useCallback, useState } from "react";
 import {
   DragDropContext,
@@ -11,6 +11,7 @@ import {
   NotDraggingStyle,
   OnDragEndResponder,
 } from "@hello-pangea/dnd";
+import { KANBAN_COLUMN_OPTIONS } from "./configs";
 
 interface Ticket {
   id: string;
@@ -27,6 +28,7 @@ const getItems = (count: number, offset = 0): Ticket[] =>
 const grid = 8;
 
 const Kanban = () => {
+  const theme = useTheme();
   const [state, setState] = useState<{
     items: Ticket[];
     selected: Ticket[];
@@ -35,30 +37,10 @@ const Kanban = () => {
     selected: getItems(5, 10),
   }));
 
-  const getItemStyle = useCallback(
-    (
-      isDragging: boolean,
-      draggableStyle: DraggingStyle | NotDraggingStyle | undefined
-    ): CSSProperties => ({
-      // some basic styles to make the items look a bit nicer
-      userSelect: "none",
-      padding: grid * 2,
-      margin: `0 0 ${grid}px 0`,
-
-      // change background colour if dragging
-      background: isDragging ? "lightgreen" : "grey",
-
-      // styles we need to apply on draggables
-      ...draggableStyle,
-    }),
-    []
-  );
-
   const getListStyle = useCallback(
     (isDraggingOver: boolean) => ({
-      background: isDraggingOver ? "lightblue" : "lightgrey",
-      padding: grid,
-      width: 250,
+      background: isDraggingOver ? "lightblue" : "transparent",
+      padding: 8,
     }),
     []
   );
@@ -159,64 +141,73 @@ const Kanban = () => {
   return (
     <Grid container spacing={2}>
       <DragDropContext onDragEnd={onDragEnd}>
-        <Grid size={4}>
-          <Droppable droppableId="droppable" isDropDisabled={false}>
-            {(provided, snapshot) => (
-              <div
-                ref={provided.innerRef}
-                style={getListStyle(snapshot.isDraggingOver)}
-              >
-                {state.items.map((item, index) => (
-                  <Draggable key={item.id} draggableId={item.id} index={index}>
-                    {(provided, snapshot) => (
-                      <div
-                        ref={provided.innerRef}
-                        {...provided.draggableProps}
-                        {...provided.dragHandleProps}
-                        style={getItemStyle(
-                          snapshot.isDragging,
-                          provided.draggableProps.style
-                        )}
-                      >
-                        {item.content}
-                      </div>
-                    )}
-                  </Draggable>
-                ))}
-                {provided.placeholder}
-              </div>
-            )}
-          </Droppable>
-        </Grid>
-        <Grid size={4}>
-          <Droppable droppableId="droppable2" isDropDisabled={false}>
-            {(provided, snapshot) => (
-              <div
-                ref={provided.innerRef}
-                style={getListStyle(snapshot.isDraggingOver)}
-              >
-                {state.selected.map((item, index) => (
-                  <Draggable key={item.id} draggableId={item.id} index={index}>
-                    {(provided, snapshot) => (
-                      <div
-                        ref={provided.innerRef}
-                        {...provided.draggableProps}
-                        {...provided.dragHandleProps}
-                        style={getItemStyle(
-                          snapshot.isDragging,
-                          provided.draggableProps.style
-                        )}
-                      >
-                        {item.content}
-                      </div>
-                    )}
-                  </Draggable>
-                ))}
-                {provided.placeholder}
-              </div>
-            )}
-          </Droppable>
-        </Grid>
+        {KANBAN_COLUMN_OPTIONS?.map((_column, i, arr) => (
+          <Grid
+            key={_column?.value}
+            size={12 / arr?.length}
+            sx={{ background: theme.palette.grey.A100, borderRadius: 2 }}
+          >
+            <Stack
+              direction="row"
+              alignItems="center"
+              borderBottom={1}
+              sx={{ px: 2, py: 1 }}
+            >
+              <Box
+                sx={{
+                  width: 6,
+                  height: 6,
+                  display: "flex",
+                  borderRadius: 999,
+                  mr: 1,
+                  background: _column?.color,
+                }}
+              />
+              <Typography sx={{ fontSize: 14, fontWeight: 500 }}>
+                {_column?.label}
+              </Typography>
+            </Stack>
+            <Droppable droppableId={_column?.value} isDropDisabled={false}>
+              {(provided, snapshot) => (
+                <div
+                  ref={provided.innerRef}
+                  style={getListStyle(snapshot.isDraggingOver)}
+                >
+                  {state.items.map((item, index) => (
+                    <Draggable
+                      key={item.id}
+                      draggableId={item.id}
+                      index={index}
+                    >
+                      {(provided, snapshot) => (
+                        <div
+                          ref={provided.innerRef}
+                          {...provided.draggableProps}
+                          {...provided.dragHandleProps}
+                          style={{
+                            userSelect: "none",
+                            padding: grid * 2,
+                            margin: `0 0 ${grid}px 0`,
+                            borderRadius: 8,
+                            border: `1px solid ${theme.palette.grey[400]}`,
+                            // change background colour if dragging
+                            background: snapshot.isDragging
+                              ? "lightgreen"
+                              : theme.palette.common.white,
+                            ...provided.draggableProps.style,
+                          }}
+                        >
+                          {item.content}
+                        </div>
+                      )}
+                    </Draggable>
+                  ))}
+                  {provided.placeholder}
+                </div>
+              )}
+            </Droppable>
+          </Grid>
+        ))}
       </DragDropContext>
     </Grid>
   );

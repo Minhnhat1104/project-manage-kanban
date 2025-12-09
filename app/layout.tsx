@@ -6,6 +6,7 @@ import { ThemeProvider } from "@mui/material/styles";
 import theme from "../theme";
 
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v13-appRouter";
+import { Paper } from "@mui/material";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -39,7 +40,9 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <AppRouterCacheProvider>
-          <ThemeProvider theme={theme}>{children}</ThemeProvider>
+          <ThemeProvider theme={theme}>
+            <Paper sx={{ width: 1, height: "100vh" }}>{children}</Paper>
+          </ThemeProvider>
         </AppRouterCacheProvider>
       </body>
     </html>
